@@ -38,6 +38,6 @@ async function doit (queueName) {
     }
 }
 
-doit("MyRecvQueue");
+doit("MyReceivingQueue");
 
-// end
+// End
