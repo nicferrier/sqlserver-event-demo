@@ -10,15 +10,15 @@ function parseMessage(message) {
 
 function waitIt(pool, queueName) {
     let request = pool.request();
-    return request.query(`waitfor( 
+    return request.query(`waitfor(
   receive top(1) convert(xml, message_body ) [message]
   FROM ${queueName}
 );`);
 }
 
-async function doit (queueName) {
-    let password = await fs.promises.readFile(path.join(__dirname, ".password"));
+async function setupConnection() {
     try {
+        let password = await fs.promises.readFile(path.join(__dirname, ".password"));
         let config = {
             user: "nicferrier",
             domain: "DESKTOP-89L3QJF",
@@ -26,27 +26,51 @@ async function doit (queueName) {
             password: password,
             port: 1433,
             database: "nicdev2",
-            requestTimeout: 60000,
+            requestTimeout: 60 * 1000,
             options: {
-                requestTimeout: 60000,
+                requestTimeout: 60 * 1000,
                 database: "nicdev2",
                 encrypt: true,
                 trustServerCertificates: true
             }
         };
         let pool = await sql.connect(config);
-        let queryResult = await waitIt(pool, queueName);
-        if (queryResult.recordset.length > 1) {
-            let msg = new String(queryResult.recordset[0].message);
-        }
-        pool.close();
+        return [undefined, pool];
     }
     catch (e) {
-        console.log("blah", e);
+        return [e];
     }
 }
 
+async function doit (queueName) {
+    let [err, con] = await setupConnection();
+    if (err) {
+        console.log("error making a connection", err);
+        return;
+    }
+    
+    // Make a function to take a promise and resolve it, with the
+    // resolution calling the same function
+    let recur = function (p) {
+        p.then(rs => {
+            try {
+                if (rs.recordset.length > 0) {
+                    let msg = new String(rs.recordset[0].message);
+                    console.log("msg", new Date(), parseMessage(msg));
+                }
+            }
+            catch (e) {
+                console.log("result failed", e);
+            }
+            recur(waitIt(con, queueName));
+        }).catch(e => {
+            recur(waitIt(con, queueName));
+        });
+    };
 
-doit("MyReceivingQueue");
+    recur(waitIt(con, queueName));
+}
+
+doit("MyRecvQueue"); /// doit('MyReceivingQueue');
 
 // End

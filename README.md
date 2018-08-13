@@ -1,5 +1,23 @@
 # SQL Server events with NodeJs
 
+It's very useful to get events out of databases. Oracle has
+OracleDatabaseChangeNotifications and PostgreSQL has LISTEN/NOTIFY.
+
+SQLServer seems to have good .NET support but can you do it in other
+languages?
+
+Yes.
+
+This is a nodejs version which is just calling SQL basically. It does
+hang a connection, I think. Not sure the connection can be used for
+anything other than waiting on the event.
+
+That's ok. It's still just waiting. Not actively hammering the
+database.
+
+
+## How to setup
+
 Presuming a database called `nicdev2`, this is how to Setup:
 
 ```sql
@@ -71,3 +89,40 @@ GO
 
 These are both thanks to [Microsoft's MSDN](https://blogs.msdn.microsoft.com/steven_bates/2006/01/05/service-broker-example-creation-of-a-simple-queue-and-posting-a-message/).
 
+NB: This is *not* how the current code is actually setup; in the
+current code we have:
+
+! name above | name the code depends on |
+-----------------------------------------
+| MySendingQueue     | MyQueue       |
+| MySendingService   | MyService     |
+| MyReceivingQueue   | MyRecvQueue   |
+| MyReceivingService | MyRecvService |
+
+But the above config (with fully specified names) *should* be used
+because it's clearer so I will reconfigure all the scripts to work
+that way.
+
+
+## How to *send* an event
+
+Use SQLCMD with the [post script](post.sql):
+
+```
+SQLCMD -i post.sql
+```
+
+this also presumes a database called `nicdev2`.
+
+## How to test the nodejs
+
+Do the usual:
+
+```
+npm install
+node work.js
+```
+
+You should see events be published.
+
+DB connections timeout after a minute and are reestablished.
