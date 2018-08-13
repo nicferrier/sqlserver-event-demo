@@ -1,14 +1,26 @@
 const sql = require("mssql");
+const fs = require("./fsasync");
+const path = require("path");
 
-async function doit () {
+function waitIt(pool, queueName) {
+    let request = pool.request();
+    return request.query(`waitfor( 
+  receive top(1) convert(xml, message_body ) [message]
+  FROM ${queueName}
+);`);
+}
+
+async function doit (queueName) {
+    let password = await fs.promises.readFile(path.join(__dirname, ".password"));
     try {
         let config = {
             user: "nicferrier",
             domain: "DESKTOP-89L3QJF",
             server: "localhost",
-            password: "boop",
+            password: password,
             port: 1433,
             database: "nicdev2",
+            requestTimeout: 60000,
             options: {
                 requestTimeout: 60000,
                 database: "nicdev2",
@@ -17,41 +29,15 @@ async function doit () {
             }
         };
         let pool = await sql.connect(config);
-
-        let request = await pool.request();
-        // request.stream = true;
-
-        /*
-        request.on("row", row => {
-            console.log(row);
-        });
-        */
-        request.on("done", () => {
-            console.log("done");
-            //pool.close();
-        });
-
-        /*
-        let queryResult1 = await request.query("select * from test2;");
-        console.log(queryResult1);
-        */
-
-        let queryResult = await request.query(`declare @cg_id uniqueidentifier;
-waitfor( 
-  GET conversation group @cg_id
-  FROM MyRecvQueue
-);
-receive top(1) conversation_group_id, message_body 
-FROM MyRecvQueue
-WHERE conversation_group_id=@cg_id;`);
-        console.log("query", queryResult, new String(queryResult.recordset[0].message_body));
-        
+        let queryResult = await waitIt(pool, queueName);
+        console.log("query", queryResult, new String(queryResult.recordset[0].message));
+        pool.close();
     }
     catch (e) {
-        console.log("error", e);
+        console.log("blah", e);
     }
 }
 
-doit();
+doit("MyRecvQueue");
 
 // end
