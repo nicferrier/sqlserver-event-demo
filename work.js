@@ -1,6 +1,12 @@
 const sql = require("mssql");
 const fs = require("./fsasync");
 const path = require("path");
+const DOMParser = require("xmldom").DOMParser;
+
+function parseMessage(message) {
+    let dom = new DOMParser().parseFromString(message);
+    return dom.childNodes[0].childNodes[0].textContent;
+}
 
 function waitIt(pool, queueName) {
     let request = pool.request();
@@ -30,13 +36,16 @@ async function doit (queueName) {
         };
         let pool = await sql.connect(config);
         let queryResult = await waitIt(pool, queueName);
-        console.log("query", queryResult, new String(queryResult.recordset[0].message));
+        if (queryResult.recordset.length > 1) {
+            let msg = new String(queryResult.recordset[0].message);
+        }
         pool.close();
     }
     catch (e) {
         console.log("blah", e);
     }
 }
+
 
 doit("MyReceivingQueue");
 

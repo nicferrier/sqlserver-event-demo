@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.3",
-    "mssql": "^4.1.0"
+    "mssql": "^4.1.0",
+    "xmldom": "^0.1.27"
   }
 }
