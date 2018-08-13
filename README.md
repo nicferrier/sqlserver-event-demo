@@ -94,12 +94,12 @@ These are both thanks to [Microsoft's MSDN](https://blogs.msdn.microsoft.com/ste
 NB: This is *not* how the current code is actually setup; in the
 current code we have:
 
-! name above | name the code depends on |
------------------------------------------
-| MySendingQueue     | MyQueue       |
-| MySendingService   | MyService     |
-| MyReceivingQueue   | MyRecvQueue   |
-| MyReceivingService | MyRecvService |
+| name above         | name the code depends on |
+|--------------------|--------------------------|
+| MySendingQueue     | MyQueue                  |
+| MySendingService   | MyService                |
+| MyReceivingQueue   | MyRecvQueue              |
+| MyReceivingService | MyRecvService            |
 
 But the above config (with fully specified names) *should* be used
 because it's clearer so I will reconfigure all the scripts to work
