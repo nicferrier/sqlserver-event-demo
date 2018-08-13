@@ -24,7 +24,7 @@ Presuming a database called `nicdev2`, this is how to Setup:
 ALTER DATABASE nicdev2 SET TRUSTWORTHY ON;
 GO
 
-USE nicedev2;
+USE nicdev2;
 GO
 
 ------------------------
@@ -72,6 +72,8 @@ GO
 How to send data to it with SQLCMD:
 
 ```sql
+use nicdev2;
+go
 DECLARE @handle uniqueidentifier;
 BEGIN DIALOG CONVERSATION @handle
 FROM SERVICE MySendingService
