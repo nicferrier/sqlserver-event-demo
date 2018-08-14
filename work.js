@@ -4,9 +4,26 @@ const path = require("path");
 const dns = require("dns");
 const DOMParser = require("xmldom").DOMParser;
 
+// Depth first xml->json using xmldom
 function parseMessage(message) {
     let dom = new DOMParser().parseFromString(message);
-    return dom.childNodes[0].childNodes[0].textContent;
+    function jsonNode(Element, result) {
+        if (Element.childNodes.length > 0) {
+            let list = Array.from(Element.childNodes);
+            result[Element.tagName] = list.map(Node => {
+                // console.log("node type", Node.nodeType);
+                switch (Node.nodeType) {
+                case 1:
+                    return jsonNode(Node, {});
+                case 3:
+                    return Node.data;
+                }
+            });
+        }
+        return result;
+    }
+    let result = jsonNode(dom.childNodes[0], {});
+    return result;
 }
 
 function queryWait(pool, queueName) {
@@ -80,6 +97,12 @@ exports.waitFor = async function (config, eventSender) {
     };
 
     recur(queryWait(poolConnection, queueName));
+}
+
+
+if (require.main === module) {
+}
+else {
 }
 
 // End
