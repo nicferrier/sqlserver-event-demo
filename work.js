@@ -8,7 +8,7 @@ function parseMessage(message) {
     return dom.childNodes[0].childNodes[0].textContent;
 }
 
-function waitIt(pool, queueName) {
+function queryWait(pool, queueName) {
     let request = pool.request();
     return request.query(`waitfor(
   receive top(1) convert(xml, message_body ) [message]
@@ -16,38 +16,48 @@ function waitIt(pool, queueName) {
 );`);
 }
 
-async function setupConnection() {
+async function setupConnection({
+    user,
+    domain,
+    server,
+    password,
+    port = 1433,
+    database,
+    queueName,
+    requestTimeout = 60 * 1000,
+    trustServerCertificates}) {
     try {
-        let password = await fs.promises.readFile(path.join(__dirname, ".password"));
-        let config = {
-            user: "nicferrier",
-            domain: "DESKTOP-89L3QJF",
-            server: "localhost",
+        let config = { // mssql config - sometimes needs hacks to pass to tedious
+            user: user,
+            domain: domain,
+            server: server,
             password: password,
-            port: 1433,
-            database: "nicdev2",
-            requestTimeout: 60 * 1000,
+            port: port,
+            database: database,
+            requestTimeout: requestTimeout,
             options: {
-                requestTimeout: 60 * 1000,
-                database: "nicdev2",
+                requestTimeout: requestTimeout,
+                database: database,
                 encrypt: true,
-                trustServerCertificates: true
+                trustServerCertificates: trustServerCertificates
             }
         };
         let pool = await sql.connect(config);
-        return [undefined, pool];
+        return [undefined, {pool: pool, queueName: queueName, config: config}];
     }
     catch (e) {
         return [e];
     }
 }
 
-async function doit (queueName) {
-    let [err, con] = await setupConnection();
+exports.waitFor = async function (config) {
+    let [err, connection] = await setupConnection(config);
     if (err) {
-        console.log("error making a connection", err);
+        console.error(`${config.queueName}:: can't make a connection to ${config.database}`, err);
         return;
     }
+
+    let {pool: poolConnection, queueName, conf} = connection;
     
     // Make a function to take a promise and resolve it, with the
     // resolution calling the same function
@@ -60,17 +70,39 @@ async function doit (queueName) {
                 }
             }
             catch (e) {
-                console.log("result failed", e);
+                console.error(`${queueName}:: queue wait result failed`, e);
             }
-            recur(waitIt(con, queueName));
+            recur(queryWait(poolConnection, queueName));
         }).catch(e => {
-            recur(waitIt(con, queueName));
+            recur(queryWait(poolConnection, queueName));
         });
     };
 
-    recur(waitIt(con, queueName));
+    recur(queryWait(poolConnection, queueName));
 }
 
-doit("MyRecvQueue"); /// doit('MyReceivingQueue');
+async function getConfig() {
+    let password = await fs.promises.readFile(path.join(__dirname, ".password"));
+    return {
+        user: "nicferrier",
+        domain: "DESKTOP-89L3QJF",
+        server: "localhost",
+        password: password,
+        database: "nicdev2",
+        queueName: "MyRecvQueue",
+        requestTimeout: 60 * 1000,
+        trustServerCertificates: true
+    };
+}
+
+// Main
+if (require.main === module) {
+    getConfig().then(config => {
+        exports.waitFor(config);
+    });
+}
+else {
+    // It's being used as a module - no need to do anything
+}
 
 // End
