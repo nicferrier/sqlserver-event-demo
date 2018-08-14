@@ -4,7 +4,7 @@
     "contributors": ["Sarang Nandgirikar, sarang@accedius.com"],
     "description": "Make SSE event stream from a SQL Server event queue stream.",
     "license": "MIT",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "keywords": [
         "sql-server",
         "tedious",
