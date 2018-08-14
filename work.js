@@ -1,6 +1,7 @@
 const sql = require("mssql");
 const fs = require("./fsasync");
 const path = require("path");
+const dns = require("dns");
 const DOMParser = require("xmldom").DOMParser;
 
 function parseMessage(message) {
@@ -81,15 +82,16 @@ exports.waitFor = async function (config) {
     recur(queryWait(poolConnection, queueName));
 }
 
-async function getConfig() {
+const os = require("os");
+async function getConfig(dbName, queueName) {
     let password = await fs.promises.readFile(path.join(__dirname, ".password"));
     return {
         user: "nicferrier",
-        domain: "DESKTOP-89L3QJF",
+        domain: os.hostname(),
         server: "localhost",
         password: password,
-        database: "nicdev2",
-        queueName: "MyRecvQueue",
+        database: dbName,
+        queueName: queueName,
         requestTimeout: 60 * 1000,
         trustServerCertificates: true
     };
@@ -97,9 +99,9 @@ async function getConfig() {
 
 // Main
 if (require.main === module) {
-    getConfig().then(config => {
-        exports.waitFor(config);
-    });
+    getConfig
+        .apply(null, process.argv.slice(2))
+        .then(config => { exports.waitFor(config); });
 }
 else {
     // It's being used as a module - no need to do anything
