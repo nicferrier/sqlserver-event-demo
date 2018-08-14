@@ -1,3 +1,5 @@
+// Send SQL Server events through an SSE socket
+
 const express = require("express");
 const SSE = require("sse-node");
 const sqlServerEvents = require("./work.js");
@@ -21,8 +23,11 @@ exports.boot = function (config, options) {
         return new Error("no webPort config variable");
     }
 
+    if (options.rootDir !== undefined) {
+        app.use("/", express.static(path.join(__dirname, "www")));
+    }
+
     const connections = {};
-    app.use("/", express.static(path.join(__dirname, "www")));
 
     let queuePath = "/queue/" + config.dbName + "/" + config.queueName;
     console.log("queuePath", queuePath);
@@ -64,7 +69,8 @@ const os = require("os");
 async function getConfig(port, dbName, queueName) {
     console.log(port, dbName, queueName);
     let password = await fs.promises.readFile(path.join(__dirname, ".password"));
-    return {
+    let webRootPath = path.join(__dirname, "www");
+    return [{
         user: os.userInfo().username,
         domain: os.hostname(),
         server: "localhost",
@@ -75,14 +81,14 @@ async function getConfig(port, dbName, queueName) {
         requestTimeout: 60 * 1000,
         trustServerCertificates: true,
         webPort: port
-    };
+    },  (fs.promises.exists(webRootPath) ? webRootPath : undefined)];
 }
 
 if (require.main === module) {
     getConfig
         .apply(null, process.argv.slice(2))
-        .then(config => {
-            exports.boot(config, {});
+        .then(([config, webRoot]) => {
+            exports.boot(config, { rootDir: webRoot });
         });
 }
 else {
