@@ -122,9 +122,11 @@ Do the usual:
 
 ```
 npm install
-node work.js
+node server.js 8004 nicdev1 MyRecvQueue
 ```
 
-You should see events be published.
+where the args are: `port` `database` and `queue`
+
+You should see events be published if you hit the demo webapp.
 
 DB connections timeout after a minute and are reestablished.
