@@ -1,17 +1,27 @@
 {
-  "name": "demo1",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^4.16.3",
-    "mssql": "^4.1.0",
-    "xmldom": "^0.1.27"
-  }
+    "name": "sql-server-sse-bridge",
+    "author": "Nic Ferrier, nic@ferrier.me.uk",
+    "contributors": ["Sarang Nandgirikar, sarang@accedius.com"],
+    "description": "Make SSE event stream from a SQL Server event queue stream.",
+    "license": "MIT",
+    "version": "0.0.1",
+    "keywords": [
+        "sql-server",
+        "tedious",
+        "tds",
+        "mssql",
+        "sse",
+        "microservice"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nicferrier/sqlserver-event-demo"
+    },
+    "main": "./server.js",
+    "dependencies": {
+        "express": "^4.16.3",
+        "mssql": "^4.1.0",
+        "sse-node": "^1.0.2",
+        "xmldom": "^0.1.27"
+    }
 }

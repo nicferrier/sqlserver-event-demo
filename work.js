@@ -51,7 +51,7 @@ async function setupConnection({
     }
 }
 
-exports.waitFor = async function (config) {
+exports.waitFor = async function (config, eventSender) {
     let [err, connection] = await setupConnection(config);
     if (err) {
         console.error(`${config.queueName}:: can't make a connection to ${config.database}`, err);
@@ -67,7 +67,7 @@ exports.waitFor = async function (config) {
             try {
                 if (rs.recordset.length > 0) {
                     let msg = new String(rs.recordset[0].message);
-                    console.log("msg", new Date(), parseMessage(msg));
+                    eventSender(new Date(), parseMessage(msg));
                 }
             }
             catch (e) {
@@ -80,31 +80,6 @@ exports.waitFor = async function (config) {
     };
 
     recur(queryWait(poolConnection, queueName));
-}
-
-const os = require("os");
-async function getConfig(dbName, queueName) {
-    let password = await fs.promises.readFile(path.join(__dirname, ".password"));
-    return {
-        user: "nicferrier",
-        domain: os.hostname(),
-        server: "localhost",
-        password: password,
-        database: dbName,
-        queueName: queueName,
-        requestTimeout: 60 * 1000,
-        trustServerCertificates: true
-    };
-}
-
-// Main
-if (require.main === module) {
-    getConfig
-        .apply(null, process.argv.slice(2))
-        .then(config => { exports.waitFor(config); });
-}
-else {
-    // It's being used as a module - no need to do anything
 }
 
 // End
