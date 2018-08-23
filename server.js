@@ -95,6 +95,7 @@ if (require.main === module) {
 }
 else {
     // Just a module - use exports.boot
+    exports.events = require(path.join(__dirname, "work.js"));
 }
 
 // End
