@@ -15,6 +15,12 @@ anything other than waiting on the event.
 That's ok. It's still just waiting. Not actively hammering the
 database.
 
+## Getting it
+
+```
+npm install sql-server-sse-bridge
+```
+
 
 ## Setting up an environment that you can test this with
 
@@ -53,3 +59,14 @@ the arriving events.
 DB connections timeout after a minute and are automatically
 reestablished.
 
+## Using your own eventing bridge
+
+You may want to just make a connection to SQL Server instead of
+starting a bridge server automatically.
+
+This is possible too:
+
+```javascript
+const sqlServerEvents = require("sql-server-sse-bridge").events;
+sqlServerEvents.waitFor(config, function (date, eventJson) { ... });
+```
