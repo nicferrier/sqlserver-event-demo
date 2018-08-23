@@ -15,12 +15,19 @@ anything other than waiting on the event.
 That's ok. It's still just waiting. Not actively hammering the
 database.
 
+## Requirements
+
+This will work anywhere you have a modern NodeJs. The [drivers
+used](https://tedious.org) are portable across operating systems.
+
+So now you can host your SQLServer on Windows and event from a unix
+box.
+
 ## Getting it
 
 ```
 npm install sql-server-sse-bridge
 ```
-
 
 ## Setting up an environment that you can test this with
 
