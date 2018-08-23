@@ -18,7 +18,8 @@ database.
 ## Requirements
 
 This will work anywhere you have a modern NodeJs. The [drivers
-used](https://tedious.org) are portable across operating systems.
+used](http://tediousjs.github.io/tedious/) are portable across
+operating systems.
 
 So now you can host your SQLServer on Windows and event from a unix
 box.
