@@ -26,7 +26,6 @@ npm install sql-server-sse-bridge
 
 You need SQL Server and some config. See [this documentation](Setup.md).
 
-
 ## How to *send* an event
 
 Use SQLCMD with the [post script](post.sql):
@@ -37,14 +36,14 @@ SQLCMD -i post.sql
 
 this also presumes a database called `nicdev2`.
 
+## Running it
 
-## How to test the nodejs
-
-Run the SSE server with enough db information to start it up:
+On a unix like OS, you could just:
 
 ```
-npm install
-node server.js 8004 nicdev2 MyRecvQueue
+npm install sql-server-sse-bridge
+echo 'mypassword' > .password
+node node_modules/sql-server-sse-bridge/server.js 8004 nicdev2 MyRecvQueue
 ```
 
 where the args are: `port` `database` and `queue`
