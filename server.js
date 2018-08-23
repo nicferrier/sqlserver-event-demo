@@ -59,6 +59,8 @@ exports.boot = function (config, options) {
         sqlServerEvents.waitFor(config, sendAll);
         console.log("serving on ", port);
     });
+
+    return app;
 }
 
 

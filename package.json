@@ -1,10 +1,12 @@
 {
     "name": "sql-server-sse-bridge",
     "author": "Nic Ferrier, nic@ferrier.me.uk",
-    "contributors": ["Sarang Nandgirikar, sarang@accedius.com"],
+    "contributors": [
+        "Sarang Nandgirikar, sarang@accedius.com"
+    ],
     "description": "Make SSE event stream from a SQL Server event queue stream.",
     "license": "MIT",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "keywords": [
         "sql-server",
         "tedious",
