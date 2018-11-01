@@ -2,29 +2,8 @@ const sql = require("mssql");
 const fs = require("./fsasync");
 const path = require("path");
 const dns = require("dns");
-const DOMParser = require("xmldom").DOMParser;
+const xml = require("./xml.js");
 
-// Depth first xml->json using xmldom
-function parseMessage(message) {
-    let dom = new DOMParser().parseFromString(message);
-    function jsonNode(Element, result) {
-        if (Element.childNodes.length > 0) {
-            let list = Array.from(Element.childNodes);
-            result[Element.tagName] = list.map(Node => {
-                // console.log("node type", Node.nodeType);
-                switch (Node.nodeType) {
-                case 1:
-                    return jsonNode(Node, {});
-                case 3:
-                    return Node.data;
-                }
-            });
-        }
-        return result;
-    }
-    let result = jsonNode(dom.childNodes[0], {});
-    return result;
-}
 
 function queryWait(pool, queueName) {
     let request = pool.request();
@@ -84,7 +63,7 @@ exports.waitFor = async function (config, eventSender) {
             try {
                 if (rs.recordset.length > 0) {
                     let msg = new String(rs.recordset[0].message);
-                    eventSender(new Date(), parseMessage(msg));
+                    eventSender(new Date(), xml.parseMessage(msg));
                 }
             }
             catch (e) {
