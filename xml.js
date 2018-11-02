@@ -45,10 +45,7 @@ const parseMessage = exports.parseMessage;
 
 function test () {
     assert.deepStrictEqual(
-        parseMessage(`<x>
-<a>a value</a>
-<b>b value</b>
-</x>`),
+        parseMessage(`<x><a>a value</a><b>b value</b></x>`),
         { x: { content: [
             { "a": { content: ["a value"]}},
             { "b": { content: ["b value"]}}
